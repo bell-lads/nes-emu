@@ -1014,33 +1014,38 @@ const OTHER_SET: [Instruction; 5] = [
 lazy_static! {
     static ref INSTRUCTIONS: Vec<&'static Instruction> = {
         let mut v = Vec::new();
-        v.extend_from_slice(&ADC_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&AND_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&ASL_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&BIT_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&BRANCHES_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&CMP_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&CPX_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&CPY_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&DEC_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&EOR_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&PROC_STATUS_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&INC_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&JMP_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&LDA_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&LDX_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&LDY_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&LSR_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&ORA_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&REGISTER_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&ROL_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&ROR_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&SBC_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&STA_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&STACK_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&STX_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&STY_SET.iter().collect::<Vec<&Instruction>>()[..]);
-        v.extend_from_slice(&OTHER_SET.iter().collect::<Vec<&Instruction>>()[..]);
+        let sets_iterators = [
+            ADC_SET.iter(),
+            AND_SET.iter(),
+            ASL_SET.iter(),
+            BIT_SET.iter(),
+            BRANCHES_SET.iter(),
+            CMP_SET.iter(),
+            CPX_SET.iter(),
+            CPY_SET.iter(),
+            DEC_SET.iter(),
+            EOR_SET.iter(),
+            PROC_STATUS_SET.iter(),
+            INC_SET.iter(),
+            JMP_SET.iter(),
+            LDA_SET.iter(),
+            LDX_SET.iter(),
+            LDY_SET.iter(),
+            LSR_SET.iter(),
+            ORA_SET.iter(),
+            REGISTER_SET.iter(),
+            ROL_SET.iter(),
+            ROR_SET.iter(),
+            SBC_SET.iter(),
+            STA_SET.iter(),
+            STACK_SET.iter(),
+            STX_SET.iter(),
+            STY_SET.iter(),
+            OTHER_SET.iter(),
+        ];
+        for it in sets_iterators {
+            v.extend_from_slice(&it.collect::<Vec<&Instruction>>()[..]);
+        }
         v
     };
     pub static ref INSTRUCTION_MAP: std::collections::HashMap<u8, &'static Instruction> = {
