@@ -19,7 +19,7 @@ impl Cpu {
             a: 0,
             x: 0,
             y: 0,
-            status: register::Status::new(),
+            status: register::Status::INITIAL_STATE,
             memory: [0; 0xFFFF],
         }
     }
