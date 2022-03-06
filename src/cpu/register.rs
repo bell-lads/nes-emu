@@ -116,12 +116,19 @@ mod tests {
             ProcFlag::OVERFLOW | ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO | ProcFlag::DECIMAL;
         assert_eq!(
             status,
-            ProcFlag::INITIAL_STATE | ProcFlag::OVERFLOW | ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO | ProcFlag::DECIMAL
+            ProcFlag::INITIAL_STATE
+                | ProcFlag::OVERFLOW
+                | ProcFlag::INTERRUPT_DISABLE
+                | ProcFlag::ZERO
+                | ProcFlag::DECIMAL
         );
         status &= !(ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO);
         assert!(status.is_set(ProcFlag::OVERFLOW | ProcFlag::DECIMAL));
         assert!(status.is_unset(ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO | ProcFlag::NEGATIVE));
-        assert_eq!(status, ProcFlag::UNUSED | ProcFlag::OVERFLOW | ProcFlag::DECIMAL);
+        assert_eq!(
+            status,
+            ProcFlag::UNUSED | ProcFlag::OVERFLOW | ProcFlag::DECIMAL
+        );
     }
 
     #[test]
@@ -132,6 +139,13 @@ mod tests {
         assert!(status.is_set(ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO));
         assert!(status.is_set(ProcFlag::CARRY | ProcFlag::NEGATIVE));
         assert!(status.is_unset(ProcFlag::DECIMAL | ProcFlag::OVERFLOW));
-        assert_eq!(status, ProcFlag::INITIAL_STATE | ProcFlag::INTERRUPT_DISABLE | ProcFlag::ZERO | ProcFlag::CARRY | ProcFlag::NEGATIVE)
+        assert_eq!(
+            status,
+            ProcFlag::INITIAL_STATE
+                | ProcFlag::INTERRUPT_DISABLE
+                | ProcFlag::ZERO
+                | ProcFlag::CARRY
+                | ProcFlag::NEGATIVE
+        )
     }
 }
