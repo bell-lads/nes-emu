@@ -42,7 +42,6 @@ impl<'a> Joypad {
     }
 
     pub fn write(&mut self, byte: &u8) {
-        //0X4016
         let first_bit_mask = 0b0000_0001;
         self.strobe_mode_on = (byte & first_bit_mask) == first_bit_mask;
         self.return_1 = false;
