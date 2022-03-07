@@ -1,1 +1,1 @@
-mod instruction;
+mod cpu;
