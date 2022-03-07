@@ -26,43 +26,43 @@ bitflags! {
 
 pub struct Joypad {
     strobe_mode_on: bool,
-    next_to_read: Button,
-    return_1: bool,
+    next_to_read: Option<Button>,
     button_status: Button,
 }
 
-impl<'a> Joypad {
+impl Joypad {
     pub fn new() -> Joypad {
         Joypad {
             strobe_mode_on: false,
-            next_to_read: Button::A,
-            return_1: false,
+            next_to_read: Some(Button::A),
             button_status: Button::empty(),
         }
     }
 
     pub fn write(&mut self, byte: &u8) {
         let first_bit_mask = 0b0000_0001;
-        self.strobe_mode_on = (byte & first_bit_mask) == first_bit_mask;
-        self.return_1 = false;
+        self.strobe_mode_on = (byte & first_bit_mask) == 1;
         if self.strobe_mode_on {
-            self.next_to_read = Button::A
+            self.next_to_read = Some(Button::A)
         }
     }
 
     pub fn read(&mut self, byte: &mut u8) {
-        if self.return_1 {
+        if self.next_to_read.is_none() {
             *byte = 1;
-        }
-        let res = self.button_status.contains(self.next_to_read) as u8;
-        if !self.strobe_mode_on {
-            if self.next_to_read != Button::RIGHT {
-                self.roll_button();
-            } else {
-                self.return_1 = true;
+        } else {
+            let res = self
+                .button_status
+                .contains(self.next_to_read.as_ref().unwrap().clone()) as u8;
+            if !self.strobe_mode_on {
+                if self.next_to_read != Some(Button::RIGHT) {
+                    self.roll_button();
+                } else {
+                    self.next_to_read = None
+                }
             }
+            *byte = res;
         }
-        *byte = res;
     }
 
     pub fn press(&mut self, key: Button) {
@@ -74,7 +74,8 @@ impl<'a> Joypad {
     }
 
     fn roll_button(&mut self) {
-        self.next_to_read = Button::from_bits(self.next_to_read.bits() << 1).unwrap();
+        self.next_to_read =
+            Some(Button::from_bits(self.next_to_read.unwrap().bits() << 1).unwrap());
     }
 }
 
