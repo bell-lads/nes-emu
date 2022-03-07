@@ -1,22 +1,6 @@
-use bitflags::bitflags;
+mod button;
 
-pub type Address = u16; //this might be moved to memory module once we have it
-
-pub const ADDRESS: Address = 0x4016;
-
-bitflags! {
-    pub struct Button: u8 {
-        const RIGHT     = 0b1000_0000;
-        const LEFT      = 0b0100_0000;
-        const DOWN      = 0b0010_0000;
-        const UP        = 0b0001_0000;
-        const START     = 0b0000_1000;
-        const SELECT    = 0b0000_0100;
-        const B         = 0b0000_0010;
-        const A         = 0b0000_0001;
-    }
-}
-
+use button::Button;
 // Order of reported buttons A, B, Select, Start, Up, Down, Left, Right
 // read cylce of a joypad for CPU :
 // Write 0x01 to joypad::ADDRESS (strobe mode on -> reset pointer to A)
@@ -26,16 +10,14 @@ bitflags! {
 
 pub struct Joypad {
     strobe_mode_on: bool,
-    next_to_read: Option<Button>,
-    button_status: Button,
+    button_state: button::State,
 }
 
 impl Joypad {
     pub fn new() -> Joypad {
         Joypad {
             strobe_mode_on: false,
-            next_to_read: Some(Button::A),
-            button_status: Button::empty(),
+            button_state: button::State::new(),
         }
     }
 
@@ -43,39 +25,23 @@ impl Joypad {
         let first_bit_mask = 0b0000_0001;
         self.strobe_mode_on = (byte & first_bit_mask) == 1;
         if self.strobe_mode_on {
-            self.next_to_read = Some(Button::A)
+            self.button_state.reset_pointer();
         }
     }
 
     pub fn read(&mut self, byte: &mut u8) {
-        if self.next_to_read.is_none() {
-            *byte = 1;
-        } else {
-            let res = self
-                .button_status
-                .contains(self.next_to_read.as_ref().unwrap().clone()) as u8;
-            if !self.strobe_mode_on {
-                if self.next_to_read != Some(Button::RIGHT) {
-                    self.roll_button();
-                } else {
-                    self.next_to_read = None
-                }
-            }
-            *byte = res;
+        self.button_state.read(byte);
+        if !self.strobe_mode_on {
+            self.button_state.roll();
         }
     }
 
     pub fn press(&mut self, key: Button) {
-        self.button_status |= key;
+        self.button_state.press(key)
     }
 
     pub fn release(&mut self, key: Button) {
-        self.button_status &= !key;
-    }
-
-    fn roll_button(&mut self) {
-        self.next_to_read =
-            Some(Button::from_bits(self.next_to_read.unwrap().bits() << 1).unwrap());
+        self.button_state.release(key)
     }
 }
 
