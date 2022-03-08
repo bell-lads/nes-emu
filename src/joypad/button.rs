@@ -13,12 +13,12 @@ bitflags! {
     }
 }
 
-pub struct State {
+pub struct Reporter {
     button_to_read: Option<Button>,
     buttons_pressed: Button,
 }
 
-impl State {
+impl Reporter {
     pub fn new() -> Self {
         Self {
             button_to_read: Some(Button::A),
@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn reset_button() {
-        let mut b = State::new();
+        let mut b = Reporter::new();
         let mut byte: u8 = 0;
         b.press(Button::A);
         b.read(&mut byte);
@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     fn roll_button() {
-        let mut b = State::new();
+        let mut b = Reporter::new();
         b.press(Button::A);
         b.press(Button::SELECT);
         b.press(Button::UP);

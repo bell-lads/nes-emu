@@ -10,14 +10,14 @@ use button::Button;
 
 pub struct Joypad {
     strobe_mode_on: bool,
-    button_state: button::State,
+    button_reporter: button::Reporter,
 }
 
 impl Joypad {
     pub fn new() -> Joypad {
         Joypad {
             strobe_mode_on: false,
-            button_state: button::State::new(),
+            button_reporter: button::Reporter::new(),
         }
     }
 
@@ -25,23 +25,23 @@ impl Joypad {
         let first_bit_mask = 0b0000_0001;
         self.strobe_mode_on = (byte & first_bit_mask) == 1;
         if self.strobe_mode_on {
-            self.button_state.reset_pointer();
+            self.button_reporter.reset_pointer();
         }
     }
 
     pub fn read(&mut self, byte: &mut u8) {
-        self.button_state.read(byte);
+        self.button_reporter.read(byte);
         if !self.strobe_mode_on {
-            self.button_state.roll();
+            self.button_reporter.roll();
         }
     }
 
     pub fn press(&mut self, key: Button) {
-        self.button_state.press(key)
+        self.button_reporter.press(key)
     }
 
     pub fn release(&mut self, key: Button) {
-        self.button_state.release(key)
+        self.button_reporter.release(key)
     }
 }
 
