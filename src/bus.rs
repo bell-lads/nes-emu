@@ -22,22 +22,24 @@ impl<'a> Bus<'a> {
         }
     }
 
-    pub fn mem_read_u8(&mut self, addr: u16) -> u8 {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn mem_read_u8(&mut self, addr: u16) -> u8 {
         let addr = mirror_address(addr);
         match addr {
-            0x4016 => unsafe { self.joypad_1.read() },
-            0x4017 => unsafe { self.joypad_2.read() },
+            0x4016 => self.joypad_1.read(),
+            0x4017 => self.joypad_2.read(),
             _ => todo!(),
         }
         self.memory[usize::from(addr)]
     }
 
-    pub fn mem_write_u8(&mut self, addr: u16, data: u8) {
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn mem_write_u8(&mut self, addr: u16, data: u8) {
         let addr = mirror_address(addr);
         self.memory[usize::from(addr)] = data;
         match addr {
-            0x4016 => unsafe { self.joypad_1.write() },
-            0x4017 => unsafe { self.joypad_2.write() },
+            0x4016 => self.joypad_1.write(),
+            0x4017 => self.joypad_2.write(),
             _ => todo!(),
         }
     }
@@ -45,12 +47,8 @@ impl<'a> Bus<'a> {
 
 fn mirror_address(addr: u16) -> u16 {
     match addr {
-        0x0000..=0x1FFF => {
-            addr & RAM_MIRRORING_MASK
-        }
-        0x2000..=0x3FFF => {
-            addr & PPU_REGISTERS_MIRRORING_MASK
-        }
+        0x0000..=0x1FFF => addr & RAM_MIRRORING_MASK,
+        0x2000..=0x3FFF => addr & PPU_REGISTERS_MIRRORING_MASK,
         _ => addr
     }
 }
