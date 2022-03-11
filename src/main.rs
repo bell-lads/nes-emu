@@ -1,44 +1,19 @@
+use nes_emu::{bus::Bus, cpu::Cpu, joypad::Joypad};
 use yew::prelude::*;
 
-enum Msg {
-    AddOne,
-}
+#[function_component(NesEmulator)]
+fn nes_emulator() -> Html {
+    let mut memory = [0; 0xFFFF];
+    let mut joypad_1 = Joypad::new(&mut memory[0x4016]);
+    let mut joypad_2 = Joypad::new(&mut memory[0x4017]);
+    let mut bus = Bus::new(&mut memory, &mut joypad_1, &mut joypad_2);
+    let mut _cpu = Cpu::new(&mut bus);
 
-struct App {
-    value: i64,
-}
-
-impl Component for App {
-    type Message = Msg;
-    type Properties = ();
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self { value: 0 }
-    }
-
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::AddOne => {
-                self.value += 1;
-                // the value has changed so we need to
-                // re-render for it to appear on the page
-                true
-            }
-        }
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        // This gives us a component's "`Scope`" which allows us to send messages, etc to the component.
-        let link = ctx.link();
-        html! {
-            <div>
-                <button onclick={ link.callback(|_| Msg::AddOne) }>{ "+1" }</button>
-                <p>{ self.value }</p>
-            </div>
-        }
+    html! {
+        <h1>{ "NES Emulator" }</h1>
     }
 }
 
 fn main() {
-    yew::start_app::<App>();
+    yew::start_app::<NesEmulator>();
 }
