@@ -118,12 +118,8 @@ mod tests {
 
     #[test]
     fn test_bus_mapping_read() {
-        let mut memory = [0; 0xFFFF];
-        let mut expected = [0; 0xFFFF];
-        memory[0] = 99;
-        memory[1] = 99;
-        memory[10] = 99;
-        memory[11] = 99;
+        let mut memory = [99; 0xFFFF];
+        let mut expected = [99; 0xFFFF];
         expected[0] = 1;
         expected[1] = 3;
         expected[10] = 21;
@@ -139,18 +135,15 @@ mod tests {
                 bus.mem_read_u8(i as u16);
                 bus.mem_read_u8((i + 10) as u16);
             }
+            assert_eq!(expected, memory);
+            memory = [99; 0xFFFF];
         }
-        assert_eq!(expected, memory);
     }
 
     #[test]
     fn test_bus_mapping_write() {
-        let mut memory = [0; 0xFFFF];
-        let mut expected = [0; 0xFFFF];
-        memory[5] = 99;
-        memory[6] = 99;
-        memory[15] = 99;
-        memory[16] = 99;
+        let mut memory = [99; 0xFFFF];
+        let mut expected = [99; 0xFFFF];
         expected[5] = 6;
         expected[6] = 7;
         expected[15] = 16;
@@ -165,7 +158,8 @@ mod tests {
                 bus.mem_write_u8((i + 5) as u16, 0);
                 bus.mem_write_u8((i + 15) as u16, 0);
             }
+            assert_eq!(expected, memory);
+            memory = [99; 0xFFFF];
         }
-        assert_eq!(expected, memory);
     }
 }
