@@ -44,14 +44,13 @@ impl Joypad {
 }
 
 impl Device for Joypad {
-
     fn mapping_def(&self) -> std::ops::Range<usize> {
-        usize::from(self.address)..usize::from(self.address+1)
+        usize::from(self.address)..usize::from(self.address + 1)
     }
 
     fn map(&mut self, memory: &mut [u8]) {
         self.memory = &mut memory[0]
-    }    
+    }
 
     /// # Safety
     /// Make sure that `memory` ptr is valid
