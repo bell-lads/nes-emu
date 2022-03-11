@@ -3,17 +3,17 @@ use crate::joypad::Joypad;
 const RAM_MIRRORING_MASK: u16 = 0b0000_0111_1111_1111;
 const PPU_REGISTERS_MIRRORING_MASK: u16 = 0b0010_0000_0000_0111;
 
-pub struct Bus<'a> {
-    memory: &'a mut [u8; 0xFFFF],
-    joypad_1: &'a mut Joypad,
-    joypad_2: &'a mut Joypad,
+pub struct Bus {
+    pub(crate) memory:  *mut [u8; 0xFFFF],
+    pub(crate) joypad_1: *mut Joypad,
+    pub(crate)joypad_2: *mut Joypad,
 }
 
-impl<'a> Bus<'a> {
+impl Bus {
     pub fn new(
-        memory: &'a mut [u8; 0xFFFF],
-        joypad_1: &'a mut Joypad,
-        joypad_2: &'a mut Joypad,
+        memory: *mut [u8; 0xFFFF],
+        joypad_1: *mut Joypad,
+        joypad_2: *mut Joypad,
     ) -> Self {
         Self {
             memory,
@@ -26,20 +26,20 @@ impl<'a> Bus<'a> {
     pub unsafe fn mem_read_u8(&mut self, addr: u16) -> u8 {
         let addr = mirror_address(addr);
         match addr {
-            0x4016 => self.joypad_1.read(),
-            0x4017 => self.joypad_2.read(),
+            0x4016 => (*self.joypad_1).read(),
+            0x4017 => (*self.joypad_2).read(),
             _ => todo!(),
         }
-        self.memory[usize::from(addr)]
+        (*self.memory)[usize::from(addr)]
     }
 
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn mem_write_u8(&mut self, addr: u16, data: u8) {
         let addr = mirror_address(addr);
-        self.memory[usize::from(addr)] = data;
+        (*self.memory)[usize::from(addr)] = data;
         match addr {
-            0x4016 => self.joypad_1.write(),
-            0x4017 => self.joypad_2.write(),
+            0x4016 => (*self.joypad_1).write(),
+            0x4017 => (*self.joypad_2).write(),
             _ => todo!(),
         }
     }

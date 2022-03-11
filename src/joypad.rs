@@ -17,7 +17,7 @@ pub struct Joypad {
     is_strobe_on: bool,
     current_button_mask: Button,
     button_status: Button,
-    memory: *mut u8,
+    pub(crate) memory: *mut u8,
 }
 
 impl Joypad {
