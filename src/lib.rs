@@ -38,8 +38,8 @@ impl Nes {
         let pinned_nes_ref: Pin<&mut Self> = Pin::as_mut(self);
         let nes_ref: &mut Self = Pin::get_unchecked_mut(pinned_nes_ref);
 
-        nes_ref.joypad_1.memory = &mut nes_ref.memory[0x4016];
-        nes_ref.joypad_2.memory = &mut nes_ref.memory[0x4017];
+        nes_ref.joypad_1.map_memory(&mut nes_ref.memory[0x4016]);
+        nes_ref.joypad_2.map_memory(&mut nes_ref.memory[0x4017]);
 
         nes_ref.bus.joypad_1 = &mut nes_ref.joypad_1;
         nes_ref.bus.joypad_2 = &mut nes_ref.joypad_2;

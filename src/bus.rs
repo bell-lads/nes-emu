@@ -6,7 +6,7 @@ const PPU_REGISTERS_MIRRORING_MASK: u16 = 0b0010_0000_0000_0111;
 pub struct Bus {
     pub(crate) memory:  *mut [u8; 0xFFFF],
     pub(crate) joypad_1: *mut Joypad,
-    pub(crate)joypad_2: *mut Joypad,
+    pub(crate) joypad_2: *mut Joypad,
 }
 
 impl Bus {
@@ -26,8 +26,8 @@ impl Bus {
     pub unsafe fn mem_read_u8(&mut self, addr: u16) -> u8 {
         let addr = mirror_address(addr);
         match addr {
-            0x4016 => (*self.joypad_1).read(),
-            0x4017 => (*self.joypad_2).read(),
+            0x4016 => (*self.joypad_1).write_mem(),
+            0x4017 => (*self.joypad_2).write_mem(),
             _ => todo!(),
         }
         (*self.memory)[usize::from(addr)]
@@ -38,8 +38,8 @@ impl Bus {
         let addr = mirror_address(addr);
         (*self.memory)[usize::from(addr)] = data;
         match addr {
-            0x4016 => (*self.joypad_1).write(),
-            0x4017 => (*self.joypad_2).write(),
+            0x4016 => (*self.joypad_1).read_mem(),
+            0x4017 => (*self.joypad_2).read_mem(),
             _ => todo!(),
         }
     }

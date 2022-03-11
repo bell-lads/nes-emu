@@ -17,7 +17,7 @@ pub struct Joypad {
     is_strobe_on: bool,
     current_button_mask: Button,
     button_status: Button,
-    pub(crate) memory: *mut u8,
+    memory: *mut u8,
 }
 
 impl Joypad {
@@ -30,9 +30,13 @@ impl Joypad {
         }
     }
 
+    pub fn map_memory(&mut self, memory: *mut u8) {
+        self.memory = memory;
+    }
+
     /// # Safety
     /// Make sure that `memory` ptr is valid
-    pub unsafe fn write(&mut self) {
+    pub unsafe fn read_mem(&mut self) {
         self.is_strobe_on = *self.memory & 1 == 1;
         if self.is_strobe_on {
             self.current_button_mask = Button::A
@@ -41,7 +45,7 @@ impl Joypad {
 
     /// # Safety
     /// Make sure that `memory` ptr is valid
-    pub unsafe fn read(&mut self) {
+    pub unsafe fn write_mem(&mut self) {
         if self.current_button_mask.is_empty() {
             *self.memory = 1;
             return;
@@ -70,7 +74,7 @@ mod tests {
         let mut joypad = Joypad::new(&mut joypad_byte);
         joypad.press(Button::A);
         unsafe {
-            joypad.read();
+            joypad.write_mem();
         }
         assert_eq!(joypad_byte, 1);
     }
@@ -82,7 +86,7 @@ mod tests {
         joypad.press(Button::A);
         joypad.release(Button::A);
         unsafe {
-            joypad.read();
+            joypad.write_mem();
         }
         assert_eq!(joypad_byte, 0);
     }
@@ -93,19 +97,19 @@ mod tests {
         let mut joypad = Joypad::new(&mut joypad_byte);
         joypad.press(Button::A);
         unsafe {
-            joypad.read();
+            joypad.write_mem();
             assert_eq!(joypad_byte, 1);
-            joypad.read();
+            joypad.write_mem();
             assert_eq!(joypad_byte, 0);
 
             std::ptr::write_volatile(&mut joypad_byte, 1);
-            joypad.write();
+            joypad.read_mem();
             std::ptr::write_volatile(&mut joypad_byte, 0);
-            joypad.write();
+            joypad.read_mem();
 
-            joypad.read();
+            joypad.write_mem();
             assert_eq!(joypad_byte, 1);
-            joypad.read();
+            joypad.write_mem();
             assert_eq!(joypad_byte, 0);
         }
     }
@@ -121,7 +125,7 @@ mod tests {
         let expected_results = [1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1];
         for result in expected_results {
             unsafe {
-                joypad.read();
+                joypad.write_mem();
             }
             assert_eq!(joypad_byte, result);
         }
@@ -133,13 +137,13 @@ mod tests {
         let mut joypad = Joypad::new(&mut joypad_byte);
         unsafe {
             std::ptr::write_volatile(&mut joypad_byte, 1);
-            joypad.write();
+            joypad.read_mem();
         }
         joypad.press(Button::A);
 
         for _ in 0..3 {
             unsafe {
-                joypad.read();
+                joypad.write_mem();
             }
             assert_eq!(joypad_byte, 1);
         }
