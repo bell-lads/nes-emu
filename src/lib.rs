@@ -1,7 +1,7 @@
 pub mod bus;
 pub mod cpu;
 pub mod joypad;
-
+mod traits;
 use bus::Bus;
 use cpu::Cpu;
 use joypad::Joypad;
@@ -20,10 +20,10 @@ impl Nes {
     pub fn new() -> Pin<Box<Self>> {
         let nes = Self {
             memory: [0; 0xFFFF],
-            joypad_1: Joypad::new(ptr::null_mut()),
-            joypad_2: Joypad::new(ptr::null_mut()),
-            bus: Bus::new(ptr::null_mut(), ptr::null_mut(), ptr::null_mut()),
-            cpu: Cpu::new(ptr::null_mut()),
+            joypad_1: Joypad::new(0x4016),
+            joypad_2: Joypad::new(0x4017),
+            bus: Bus::new(),
+            cpu: Cpu::new(ptr::null_mut::<Bus>()),
             _pin: PhantomPinned
         };
 
@@ -37,13 +37,9 @@ impl Nes {
     unsafe fn map_devices(self: &mut Pin<Box<Self>>) {
         let pinned_nes_ref: Pin<&mut Self> = Pin::as_mut(self);
         let nes_ref: &mut Self = Pin::get_unchecked_mut(pinned_nes_ref);
-
-        nes_ref.joypad_1.map_memory(&mut nes_ref.memory[0x4016]);
-        nes_ref.joypad_2.map_memory(&mut nes_ref.memory[0x4017]);
-
-        nes_ref.bus.joypad_1 = &mut nes_ref.joypad_1;
-        nes_ref.bus.joypad_2 = &mut nes_ref.joypad_2;
-        
-        nes_ref.cpu.bus = &mut nes_ref.bus;
+        nes_ref.bus.map(&mut nes_ref.memory,&[
+            &mut nes_ref.joypad_1,
+            &mut nes_ref.joypad_2
+        ])
     }
 }
