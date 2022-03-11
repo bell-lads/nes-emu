@@ -1,13 +1,9 @@
-use nes_emu::{bus::Bus, cpu::Cpu, joypad::Joypad};
+use nes_emu::Nes;
 use yew::prelude::*;
 
 #[function_component(NesEmulator)]
 fn nes_emulator() -> Html {
-    let mut memory = [0; 0xFFFF];
-    let mut joypad_1 = Joypad::new(&mut memory[0x4016]);
-    let mut joypad_2 = Joypad::new(&mut memory[0x4017]);
-    let mut bus = Bus::new(&mut memory, &mut joypad_1, &mut joypad_2);
-    let mut _cpu = Cpu::new(&mut bus);
+    let nes = Nes::new();
 
     html! {
         <h1>{ "NES Emulator" }</h1>
