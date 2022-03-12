@@ -1,23 +1,21 @@
 use crate::traits::{Device, Memory};
 
+use std::ops::Range;
+use std::ptr;
+
 const RAM_MIRRORING_MASK: u16 = 0b0000_0111_1111_1111;
 const PPU_REGISTERS_MIRRORING_MASK: u16 = 0b0010_0000_0000_0111;
 
-enum RunMode {
-    Read,
-    Write,
-}
-
 pub struct Bus {
     memory: *mut [u8; 0xFFFF],
-    devices: Vec<(std::ops::Range<usize>, *mut dyn Device)>,
+    devices: Vec<(Range<usize>, *mut dyn Device)>,
 }
 
 impl Bus {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
-            memory: std::ptr::null_mut(),
+            memory: ptr::null_mut(),
             devices: Vec::new(),
         }
     }
@@ -32,18 +30,11 @@ impl Bus {
         }
     }
 
-    fn run_device(&mut self, address: u16, run_mode: RunMode) {
-        for (range, device) in self.devices.iter() {
-            if range.contains(&usize::from(address)) {
-                unsafe {
-                    match run_mode {
-                        RunMode::Read => (**device).mem_read(),
-                        RunMode::Write => (**device).mem_write(),
-                    }
-                }
-                break;
-            }
-        }
+    fn mapped_device(&self, addr: u16) -> Option<*mut dyn Device> {
+        self.devices
+            .iter()
+            .find(|(range, _)| range.contains(&usize::from(addr)))
+            .map(|(_, device)| *device)
     }
 }
 
@@ -51,7 +42,9 @@ impl Memory for Bus {
     #[allow(clippy::missing_safety_doc)]
     unsafe fn mem_read_u8(&mut self, addr: u16) -> u8 {
         let addr = mirror_address(addr);
-        self.run_device(addr, RunMode::Write);
+        if let Some(device) = self.mapped_device(addr) {
+            (*device).mem_write();
+        };
         (*self.memory)[usize::from(addr)]
     }
 
@@ -59,7 +52,9 @@ impl Memory for Bus {
     unsafe fn mem_write_u8(&mut self, addr: u16, data: u8) {
         let addr = mirror_address(addr);
         (*self.memory)[usize::from(addr)] = data;
-        self.run_device(addr, RunMode::Read);
+        if let Some(device) = self.mapped_device(addr) {
+            (*device).mem_read();
+        };
     }
 }
 
@@ -90,7 +85,7 @@ mod tests {
     }
 
     impl Device for MockDevice {
-        fn mapping_def(&self) -> std::ops::Range<usize> {
+        fn mapping_def(&self) -> Range<usize> {
             self.start..self.start + 2
         }
 
