@@ -1,5 +1,7 @@
 use bitflags::bitflags;
 
+use crate::traits::Device;
+
 bitflags! {
     pub struct Button: u8 {
         const RIGHT    = 0b10000000;
@@ -14,6 +16,7 @@ bitflags! {
 }
 
 pub struct Joypad {
+    address: u16,
     is_strobe_on: bool,
     current_button_mask: Button,
     button_status: Button,
@@ -21,38 +24,13 @@ pub struct Joypad {
 }
 
 impl Joypad {
-    pub fn new(memory: *mut u8) -> Self {
+    pub fn new(address: u16) -> Self {
         Self {
+            address,
             is_strobe_on: false,
             current_button_mask: Button::A,
             button_status: Button::from_bits_truncate(0),
-            memory,
-        }
-    }
-
-    pub fn map_memory(&mut self, memory: *mut u8) {
-        self.memory = memory;
-    }
-
-    /// # Safety
-    /// Make sure that `memory` ptr is valid
-    pub unsafe fn read_mem(&mut self) {
-        self.is_strobe_on = *self.memory & 1 == 1;
-        if self.is_strobe_on {
-            self.current_button_mask = Button::A
-        }
-    }
-
-    /// # Safety
-    /// Make sure that `memory` ptr is valid
-    pub unsafe fn write_mem(&mut self) {
-        if self.current_button_mask.is_empty() {
-            *self.memory = 1;
-            return;
-        }
-        *self.memory = u8::from(self.button_status.contains(self.current_button_mask));
-        if !self.is_strobe_on {
-            self.current_button_mask.bits <<= 1;
+            memory: std::ptr::null_mut(),
         }
     }
 
@@ -65,59 +43,95 @@ impl Joypad {
     }
 }
 
+impl Device for Joypad {
+    fn mapping_def(&self) -> std::ops::Range<usize> {
+        usize::from(self.address)..usize::from(self.address + 1)
+    }
+
+    fn map(&mut self, memory: &mut [u8]) {
+        self.memory = &mut memory[0]
+    }
+
+    /// # Safety
+    /// Make sure that `memory` ptr is valid
+    unsafe fn mem_read(&mut self) {
+        self.is_strobe_on = *self.memory & 1 == 1;
+        if self.is_strobe_on {
+            self.current_button_mask = Button::A
+        }
+    }
+
+    /// # Safety
+    /// Make sure that `memory` ptr is valid
+    unsafe fn mem_write(&mut self) {
+        if self.current_button_mask.is_empty() {
+            *self.memory = 1;
+            return;
+        }
+        *self.memory = u8::from(self.button_status.contains(self.current_button_mask));
+        if !self.is_strobe_on {
+            self.current_button_mask.bits <<= 1;
+        }
+    }
+}
+
 mod tests {
     use super::*;
 
     #[test]
     fn test_press_button_a() {
-        let mut joypad_byte = 0;
-        let mut joypad = Joypad::new(&mut joypad_byte);
+        let mut joypad_byte = [0; 1];
+        let mut joypad = Joypad::new(0x4016);
+        joypad.map(&mut joypad_byte);
         joypad.press(Button::A);
         unsafe {
-            joypad.write_mem();
+            joypad.mem_write();
         }
-        assert_eq!(joypad_byte, 1);
+        assert_eq!(joypad_byte[0], 1);
     }
 
     #[test]
     fn test_release_button_a() {
-        let mut joypad_byte = 0;
-        let mut joypad = Joypad::new(&mut joypad_byte);
+        let mut joypad_byte = [0; 1];
+        let mut joypad = Joypad::new(0x4016);
+        joypad.map(&mut joypad_byte);
         joypad.press(Button::A);
         joypad.release(Button::A);
         unsafe {
-            joypad.write_mem();
+            joypad.mem_write();
         }
-        assert_eq!(joypad_byte, 0);
+        assert_eq!(joypad_byte[0], 0);
     }
 
     #[test]
     fn test_button_index_reset() {
-        let mut joypad_byte = 0;
-        let mut joypad = Joypad::new(&mut joypad_byte);
+        let mut joypad_byte = [0; 1];
+        let mut joypad = Joypad::new(0x4016);
+        joypad.map(&mut joypad_byte);
         joypad.press(Button::A);
         unsafe {
-            joypad.write_mem();
-            assert_eq!(joypad_byte, 1);
-            joypad.write_mem();
-            assert_eq!(joypad_byte, 0);
+            joypad.mem_write();
+            assert_eq!(joypad_byte[0], 1);
+            joypad.mem_write();
+            assert_eq!(joypad_byte[0], 0);
 
-            std::ptr::write_volatile(&mut joypad_byte, 1);
-            joypad.read_mem();
-            std::ptr::write_volatile(&mut joypad_byte, 0);
-            joypad.read_mem();
+            std::ptr::write_volatile(&mut joypad_byte[0], 1);
+            joypad.mem_read();
+            std::ptr::write_volatile(&mut joypad_byte[0], 0);
+            joypad.mem_read();
 
-            joypad.write_mem();
-            assert_eq!(joypad_byte, 1);
-            joypad.write_mem();
-            assert_eq!(joypad_byte, 0);
+            joypad.mem_write();
+            assert_eq!(joypad_byte[0], 1);
+            joypad.mem_write();
+            assert_eq!(joypad_byte[0], 0);
         }
     }
 
     #[test]
     fn test_reading_when_strobe_off() {
-        let mut joypad_byte = 0;
-        let mut joypad = Joypad::new(&mut joypad_byte);
+        let mut joypad_byte = [0; 1];
+        let mut joypad = Joypad::new(0x4016);
+        joypad.map(&mut joypad_byte);
         joypad.press(Button::A);
         joypad.press(Button::SELECT);
         joypad.press(Button::UP);
@@ -125,27 +139,28 @@ mod tests {
         let expected_results = [1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1];
         for result in expected_results {
             unsafe {
-                joypad.write_mem();
+                joypad.mem_write();
             }
-            assert_eq!(joypad_byte, result);
+            assert_eq!(joypad_byte[0], result);
         }
     }
 
     #[test]
     fn test_reading_when_strobe_on() {
-        let mut joypad_byte = 0;
-        let mut joypad = Joypad::new(&mut joypad_byte);
+        let mut joypad_byte = [0; 1];
+        let mut joypad = Joypad::new(0x4016);
+        joypad.map(&mut joypad_byte);
         unsafe {
-            std::ptr::write_volatile(&mut joypad_byte, 1);
-            joypad.read_mem();
+            std::ptr::write_volatile(&mut joypad_byte[0], 1);
+            joypad.mem_read();
         }
         joypad.press(Button::A);
 
         for _ in 0..3 {
             unsafe {
-                joypad.write_mem();
+                joypad.mem_write();
             }
-            assert_eq!(joypad_byte, 1);
+            assert_eq!(joypad_byte[0], 1);
         }
     }
 }

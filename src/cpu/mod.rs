@@ -1,7 +1,7 @@
 mod instruction;
 mod register;
 
-use crate::bus::Bus;
+use crate::traits::Memory;
 
 pub struct Cpu {
     counter: register::ProgramCounter,
@@ -10,11 +10,11 @@ pub struct Cpu {
     x: register::X,
     y: register::Y,
     status: register::Status,
-    pub(crate) bus: *mut Bus,
+    memory: *mut dyn Memory,
 }
 
 impl Cpu {
-    pub fn new(bus: *mut Bus) -> Self {
+    pub fn new(memory: *mut dyn Memory) -> Self {
         Self {
             counter: 0,
             stack_pointer: 0,
@@ -22,7 +22,7 @@ impl Cpu {
             x: 0,
             y: 0,
             status: register::Status::INITIAL_STATE,
-            bus,
+            memory,
         }
     }
 }
