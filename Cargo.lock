@@ -199,7 +199,11 @@ name = "nes-emu"
 version = "0.1.0"
 dependencies = [
  "bitflags",
+ "gloo-render",
+ "js-sys",
  "lazy_static",
+ "wasm-bindgen",
+ "web-sys",
  "yew",
 ]
 
