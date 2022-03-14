@@ -461,7 +461,7 @@ end:
 
 
 #[test]
-fn test_asl_a(){
+fn test_asl_a_and_bsc(){
     let mut mock = create_mock_from_script(
  r#"LDA $05
     ASL A
@@ -471,7 +471,7 @@ fn test_asl_a(){
     STX $0042
 end:
     LDX #42
-    STA $0042"#
+    STX $0042"#
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {

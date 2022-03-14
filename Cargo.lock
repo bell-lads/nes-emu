@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "asm_6502"
 version = "0.1.0"
-source = "git+https://github.com/KOomaXX/asm-6502-rs.git#7619f020f4c966250a7f5216b367d0ca5383a0d0"
+source = "git+https://github.com/KOomaXX/asm-6502-rs.git#2c0ca702acd5b6f2b2ed567ef271df1ff4b66204"
 dependencies = [
  "lazy_static",
 ]
@@ -251,9 +251,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.15"
+version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "864d3e96a899863136fc6e99f3d7cae289dafe43bf2c5ac19b70df7210c0a145"
+checksum = "b4af2ec4714533fcdf07e886f17025ace8b997b9ce51204ee69b6da831c3da57"
 dependencies = [
  "proc-macro2",
 ]
@@ -309,9 +309,9 @@ checksum = "9def91fd1e018fe007022791f865d0ccc9b3a0d5001e01aabb8b40e46000afb5"
 
 [[package]]
 name = "syn"
-version = "1.0.86"
+version = "1.0.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a65b3f4ffa0092e9887669db0eae07941f023991ab58ea44da8fe8e2d511c6b"
+checksum = "ea297be220d52398dcc07ce15a209fce436d361735ac1db700cab3b6cdfb9f54"
 dependencies = [
  "proc-macro2",
  "quote",
