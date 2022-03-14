@@ -40,6 +40,11 @@ impl Bus {
 
 impl Memory for Bus {
     #[allow(clippy::missing_safety_doc)]
+    unsafe fn load(&mut self, data: &[u8], dest: u16) {
+        (*self.memory)[usize::from(dest)..usize::from(dest) + data.len()].copy_from_slice(data);
+    }
+
+    #[allow(clippy::missing_safety_doc)]
     unsafe fn mem_read_u8(&mut self, addr: u16) -> u8 {
         let addr = mirror_address(addr);
         if let Some(device) = self.mapped_device(addr) {
