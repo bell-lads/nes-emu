@@ -3,6 +3,14 @@
 version = 3
 
 [[package]]
+name = "asm_6502"
+version = "0.1.0"
+source = "git+https://github.com/KOomaXX/asm-6502-rs.git#7619f020f4c966250a7f5216b367d0ca5383a0d0"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -198,6 +206,7 @@ dependencies = [
 name = "nes-emu"
 version = "0.1.0"
 dependencies = [
+ "asm_6502",
  "bitflags",
  "gloo-render",
  "js-sys",

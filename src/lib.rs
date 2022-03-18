@@ -1,7 +1,7 @@
-pub mod bus;
+mod bus;
 pub mod cpu;
-pub mod joypad;
-mod traits;
+mod joypad;
+pub mod traits;
 use bus::Bus;
 use cpu::Cpu;
 use joypad::Joypad;

@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 pub type Opcode = u8;
 
 #[derive(Debug)]
-enum Mode {
+pub enum Mode {
     Immediate,
     ZeroPage,
     ZeroPageX,
@@ -16,14 +16,15 @@ enum Mode {
     IndirectY,
     Implicit,
     Accumulator,
+    Relative,
 }
 
 #[derive(Debug)]
 pub struct Instruction {
-    name: &'static str,
-    opcode: Opcode,
-    mode: Mode,
-    len: u8,
+    pub name: &'static str,
+    pub opcode: Opcode,
+    pub mode: Mode,
+    pub len: u8,
 }
 
 impl Instruction {
@@ -66,14 +67,14 @@ const INSTRUCTIONS: [Instruction; 151] = [
     Instruction::new("BIT", 0x24, Mode::ZeroPage, 2),
     Instruction::new("BIT", 0x2C, Mode::Absolute, 3),
     //BRANCHES_SET
-    Instruction::new("BPL", 0x10, Mode::Implicit, 1),
-    Instruction::new("BMI", 0x30, Mode::Implicit, 1),
-    Instruction::new("BVC", 0x50, Mode::Implicit, 1),
-    Instruction::new("BVS", 0x70, Mode::Implicit, 1),
-    Instruction::new("BCC", 0x90, Mode::Implicit, 1),
-    Instruction::new("BCS", 0xB0, Mode::Implicit, 1),
-    Instruction::new("BNE", 0xD0, Mode::Implicit, 1),
-    Instruction::new("BEQ", 0xF0, Mode::Implicit, 1),
+    Instruction::new("BPL", 0x10, Mode::Relative, 2),
+    Instruction::new("BMI", 0x30, Mode::Relative, 2),
+    Instruction::new("BVC", 0x50, Mode::Relative, 2),
+    Instruction::new("BVS", 0x70, Mode::Relative, 2),
+    Instruction::new("BCC", 0x90, Mode::Relative, 2),
+    Instruction::new("BCS", 0xB0, Mode::Relative, 2),
+    Instruction::new("BNE", 0xD0, Mode::Relative, 2),
+    Instruction::new("BEQ", 0xF0, Mode::Relative, 2),
     //CMP_SET
     Instruction::new("CMP", 0xC9, Mode::Immediate, 2),
     Instruction::new("CMP", 0xC5, Mode::ZeroPage, 2),
@@ -244,7 +245,8 @@ mod tests {
             | Mode::ZeroPageX
             | Mode::ZeroPageY
             | Mode::IndirectX
-            | Mode::IndirectY => 2,
+            | Mode::IndirectY
+            | Mode::Relative => 2,
             Mode::Absolute | Mode::AbsoluteX | Mode::AbsoluteY | Mode::Indirect => 3,
         }
     }
