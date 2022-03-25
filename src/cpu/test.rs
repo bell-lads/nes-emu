@@ -1,4 +1,5 @@
-use nes_emu::{cpu::Cpu, traits::Memory};
+use super::*;
+use crate::traits::Memory;
 
 struct MemoryMock {
     pub memory: [u8; 0xFFFF],
