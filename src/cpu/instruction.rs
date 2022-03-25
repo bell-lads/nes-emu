@@ -267,9 +267,9 @@ const INSTRUCTIONS: [Instruction; 151] = [
     Instruction::new(Name::Stx, 0x86, Mode::ZeroPage, 2),
     Instruction::new(Name::Stx, 0x96, Mode::ZeroPageY, 2),
     Instruction::new(Name::Stx, 0x8E, Mode::Absolute, 3),
-    Instruction::new(Name::Stx, 0x84, Mode::ZeroPage, 2),
-    Instruction::new(Name::Stx, 0x94, Mode::ZeroPageX, 2),
-    Instruction::new(Name::Stx, 0x8C, Mode::Absolute, 3),
+    Instruction::new(Name::Sty, 0x84, Mode::ZeroPage, 2),
+    Instruction::new(Name::Sty, 0x94, Mode::ZeroPageX, 2),
+    Instruction::new(Name::Sty, 0x8C, Mode::Absolute, 3),
     //OTHER_SET
     Instruction::new(Name::Brk, 0x00, Mode::Implicit, 1),
     Instruction::new(Name::Jsr, 0x20, Mode::Absolute, 3),
