@@ -47,39 +47,39 @@ impl Cpu {
             let previous_position = self.counter;
             println!("{:?}", instruct);
             let addr = self.get_operand_address(&instruct.mode);
-            let  operand = if addr != IMPLICIT_MODE_ADDR { 
+            let operand = if addr != IMPLICIT_MODE_ADDR { 
                 (*self.memory).mem_read_u8(addr)
             } else {
                 0
             };
-            match instruct.opcode {
-                0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71   => self.adc(operand),//tested
-                0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31   => self.and(operand),//tested
-                0x06 | 0x16 | 0x0E | 0x1E                               => self.asl(operand, addr),
-                0x0A                                                    => self.asl_a(),
-                0x24 | 0x2C                                             => self.bit(operand),
-                0x90                                                    => self.bcc(addr),//tested
-                0xB0                                                    => self.bcs(addr),//tested
-                0xF0                                                    => self.beq(addr),//tested
-                0x30                                                    => self.bmi(addr),//tested
-                0xD0                                                    => self.bne(addr),//tested
-                0x10                                                    => self.bpl(addr),//tested
-                0x50                                                    => self.bvc(addr),//tested
-                0x70                                                    => self.bvs(addr),//tested
-                0x18                                                    => self.clc(),//tested
-                0xD8                                                    => self.cld(),
-                0x58                                                    => self.cli(),
-                0xB8                                                    => self.clv(),//tested
-                0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 |0xB1    => self.lda(operand),//tested
-                0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE                        => self.ldx(operand),//tested
-                0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC                        => self.ldy(operand),//tested
-                0x38                                                    => self.sec(),//tested
-                0xF8                                                    => self.sed(),
-                0x78                                                    => self.sei(),
-                0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91          => self.sta(addr),//tested
-                0x86 | 0x96 | 0x8E                                      => self.stx(addr),//tested
-                0x84 | 0x94 | 0x8C                                      => self.sty(addr),//testes
-                _ => panic!("Cpu :: Unexpected opcode : {}", instruct.opcode)
+            match instruct.name {
+                instruction::Name::Adc => self.adc(operand),//tested
+                instruction::Name::And => self.and(operand),//tested
+                instruction::Name::Asl if instruct.mode == instruction::Mode::Accumulator => self.asl_a(),
+                instruction::Name::Asl => self.asl(operand, addr),
+                instruction::Name::Bit => self.bit(operand),
+                instruction::Name::Bcc => self.bcc(addr),//tested
+                instruction::Name::Bcs => self.bcs(addr),//tested
+                instruction::Name::Beq => self.beq(addr),//tested
+                instruction::Name::Bmi => self.bmi(addr),//tested
+                instruction::Name::Bne => self.bne(addr),//tested
+                instruction::Name::Bpl => self.bpl(addr),//tested
+                instruction::Name::Bvc => self.bvc(addr),//tested
+                instruction::Name::Bvs => self.bvs(addr),//tested
+                instruction::Name::Clc => self.clc(),//tested
+                instruction::Name::Cld => self.cld(),
+                instruction::Name::Cli => self.cli(),
+                instruction::Name::Clv => self.clv(),//tested
+                instruction::Name::Lda => self.lda(operand),//tested
+                instruction::Name::Ldx => self.ldx(operand),//tested
+                instruction::Name::Ldy => self.ldy(operand),//tested
+                instruction::Name::Sec => self.sec(),//tested
+                instruction::Name::Sed => self.sed(),
+                instruction::Name::Sei => self.sei(),
+                instruction::Name::Sta => self.sta(addr),//tested
+                instruction::Name::Stx => self.stx(addr),//tested
+                instruction::Name::Sty => self.sty(addr),//testes,
+                _ => todo!()
             }
             if !self.has_branched(previous_position) {
                 self.counter += u16::from(instruct.len - 1);
@@ -125,7 +125,6 @@ impl Cpu {
             }
             instruction::Mode::Implicit => u16::MAX,
             instruction::Mode::Accumulator => u16::MAX,
-            _ => panic!("Cpu :: Unexpected mode : {:?}", mode),
         }
     }
 
@@ -289,3 +288,6 @@ impl Cpu {
         previous_addr != self.counter
     }
 }
+
+#[cfg(test)]
+mod test;
