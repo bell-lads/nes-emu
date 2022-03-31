@@ -6,8 +6,6 @@ pub type X = u8;
 pub type Y = u8;
 pub type StackPointer = u8;
 
-const PROGRAM_COUNTER_START: ProgramCounter = 0xFFFC;
-
 bitflags! {
     pub struct Status: u8 {
         const NEGATIVE =            0b1000_0000;

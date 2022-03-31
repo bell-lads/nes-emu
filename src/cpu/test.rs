@@ -65,21 +65,6 @@ end:
     BRK"#)
 }
 
-fn create_adc_test_scipt(command: &str) -> String {
-    format!(
- r#"{command} forward
-backward:
-    LDA #42
-    STA $42
-    {command} end
-forward:
-    {command} backward
-    LDA #99
-    STA $42
-end:
-    BRK"#)
-}
-
 #[test]
 fn lda_immediate_and_sta_zero_page() {
     let mut mock = create_mock_from_script(
@@ -462,7 +447,7 @@ end:
 
 
 #[test]
-fn test_asl_a_and_bsc(){
+fn test_asl_a_and_bcs(){
     let mut mock = create_mock_from_script(
  r#"LDA $05
     ASL A
@@ -481,4 +466,602 @@ end:
     }
     assert_eq!(0b0101_0100, mock.memory[0x10]);
     assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_asl_and_bcs(){
+    let mut mock = create_mock_from_script(
+ r#"ASL $05
+    LDA $05
+    STA $10
+    BCS end
+    LDX #99
+    STX $0042
+end:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x05, 0b1010_1010);
+        cpu.run()
+    }
+    assert_eq!(0b0101_0100, mock.memory[0x10]);
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cmp_bmi(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #10
+    CMP $00
+    BMI inferior
+    LDX #99
+    STX $0042
+inferior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cmp_bpl(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #20
+    CMP $00
+    BPL superior
+    LDX #99
+    STX $0042
+superior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cmp_beq(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #15
+    CMP $00
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpx_bmi(){
+    let mut mock = create_mock_from_script(
+ r#"LDX #10
+    CPX $00
+    BMI inferior
+    LDX #99
+    STX $0042
+inferior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpx_bpl(){
+    let mut mock = create_mock_from_script(
+ r#"LDX #20
+    CPX $00
+    BPL superior
+    LDX #99
+    STX $0042
+superior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpx_beq(){
+    let mut mock = create_mock_from_script(
+ r#"LDX #15
+    CPX $00
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpy_bmi(){
+    let mut mock = create_mock_from_script(
+ r#"LDY #10
+    CPY $00
+    BMI inferior
+    LDX #99
+    STX $0042
+inferior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpy_bpl(){
+    let mut mock = create_mock_from_script(
+ r#"LDY #20
+    CPY $00
+    BPL superior
+    LDX #99
+    STX $0042
+superior:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_cpy_beq(){
+    let mut mock = create_mock_from_script(
+ r#"LDY #15
+    CPY $00
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 15);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_dec_beq(){
+    let mut mock = create_mock_from_script(
+ r#"DEC $00
+    LDA $00
+    CMP #9
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 10);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_dex_beq(){
+    let mut mock = create_mock_from_script(
+ r#"LDX $00
+    DEX
+    CPX #9
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 10);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_dey_beq(){
+    let mut mock = create_mock_from_script(
+ r#"LDY $00
+    DEY
+    CPY #9
+    BEQ equal
+    LDX #99
+    STX $0042
+equal:
+    LDX #42
+    STX $0042"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x00, 10);
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_eor(){
+    let mut mock = create_mock_from_script(
+ r#"LDA $12
+    EOR #%10101010
+    STA $12"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x12, 0b11001100);
+        cpu.run()
+    }
+    assert_eq!(0b01100110, mock.memory[0x12])
+}
+
+#[test]
+fn test_inc(){
+    let mut mock = create_mock_from_script(
+ r#"INC $12"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x12, 9);
+        cpu.run()
+    }
+    assert_eq!(10, mock.memory[0x12])
+}
+
+#[test]
+fn test_inx(){
+    let mut mock = create_mock_from_script(
+ r#"LDX $12
+    INX
+    STX $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x12, 9);
+        cpu.run()
+    }
+    assert_eq!(10, mock.memory[0x42])
+}
+
+#[test]
+fn test_iny(){
+    let mut mock = create_mock_from_script(
+ r#"LDY $12
+    INY
+    STY $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0x12, 9);
+        cpu.run()
+    }
+    assert_eq!(10, mock.memory[0x42])
+}
+
+#[test]
+fn test_lsr_a_and_bcs(){
+    let mut mock = create_mock_from_script(
+ r#"LDA $AB
+    LSR A
+    STA $AB
+    BCS carryset
+    LDX #99
+    STX $42
+carryset:
+    LDX #42
+    STX $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1011);
+        cpu.run()
+    }
+    assert_eq!(0b0101_0101, mock.memory[0xAB]);
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_lsr_and_bcs(){
+    let mut mock = create_mock_from_script(
+ r#"LSR $AB
+    BCS carryset
+    LDX #99
+    STX $42
+carryset:
+    LDX #42
+    STX $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1011);
+        cpu.run()
+    }
+    assert_eq!(0b0101_0101, mock.memory[0xAB]);
+    assert_eq!(42, mock.memory[0x42])
+}
+
+#[test]
+fn test_ora(){
+    let mut mock = create_mock_from_script(
+ r#"LDA $AB
+    ORA #%00001111
+    STA $BA"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1111_0000);
+        cpu.run()
+    }
+    assert_eq!(0b1111_1111, mock.memory[0xBA]);
+}
+
+#[test]
+fn test_pha(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #42
+    PHA"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x01FF]);
+}
+
+#[test]
+fn test_pla(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #42
+    PHA
+    LDA #0
+    PLA
+    STA $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+#[test]
+fn test_rol_a(){
+    let mut mock = create_mock_from_script(
+ r#"SEC
+    LDA $AB
+    ROL A
+    STA $42
+    BCS end
+    LDA #99
+    STA $AB
+end:
+    LDA #42
+    STA $AB"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1010);
+        cpu.run()
+    }
+    assert_eq!(0b0101_0101, mock.memory[0x42]);
+    assert_eq!(42, mock.memory[0xAB]);
+}
+
+#[test]
+fn test_rol(){
+    let mut mock = create_mock_from_script(
+ r#"SEC
+    ROL $AB
+    BCS end
+    LDA #99
+    STA $42
+end:
+    LDA #42
+    STA $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1010);
+        cpu.run()
+    }
+    assert_eq!(0b0101_0101, mock.memory[0xAB]);
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+#[test]
+fn test_ror_a(){
+    let mut mock = create_mock_from_script(
+ r#"SEC
+    LDA $AB
+    ROR A
+    STA $42
+    BCC end
+    LDA #99
+    STA $AB
+    BRK
+end:
+    LDA #42
+    STA $AB"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1010);
+        cpu.run()
+    }
+    assert_eq!(0b1101_0101, mock.memory[0x42]);
+    assert_eq!(42, mock.memory[0xAB]);
+}
+
+#[test]
+fn test_ror(){
+    let mut mock = create_mock_from_script(
+ r#"SEC
+    ROR $AB
+    BCC end
+    LDA #99
+    STA $42
+    BRK
+end:
+    LDA #42
+    STA $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        mock.mem_write_u8(0xAB, 0b1010_1010);
+        cpu.run()
+    }
+    assert_eq!(0b1101_0101, mock.memory[0xAB]);
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+
+#[test]
+fn test_tax(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #42
+    TAX
+    STX $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+#[test]
+fn test_txa(){
+    let mut mock = create_mock_from_script(
+ r#"LDX #42
+    TXA
+    STA $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+#[test]
+fn test_tay(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #42
+    TAY
+    STY $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+
+#[test]
+fn test_tya(){
+    let mut mock = create_mock_from_script(
+ r#"LDY #42
+    TYA
+    STA $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(42, mock.memory[0x42]);
+}
+
+#[test]
+fn test_txs(){
+    let mut mock = create_mock_from_script(
+ r#"LDA #1
+    PHA
+    LDA #2
+    PHA
+    LDX $FF
+    TXS 
+    LDA #10
+    PHA
+    LDA #30
+    PHA
+    PLA
+    TAX
+    STX $42
+    PLA
+    STA $43"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(30, mock.memory[0x42]);
+    assert_eq!(10, mock.memory[0x43]);
+}
+
+#[test]
+fn test_tsx(){
+    let mut mock = create_mock_from_script(
+ r#"PHA
+    TSX
+    STX $42"#
+    );
+    let mut cpu = Cpu::new(&mut mock);
+    unsafe {
+        cpu.run()
+    }
+    assert_eq!(0xFE, mock.memory[0x42]);
 }
