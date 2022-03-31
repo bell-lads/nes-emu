@@ -47,7 +47,7 @@ impl Cpu {
             self.counter += 1;
             let previous_position = self.counter;
             let addr = self.get_operand_address(&instruct.mode);
-            let operand = if addr != IMPLICIT_MODE_ADDR { 
+            let operand = if addr != IMPLICIT_MODE_ADDR {
                 (*self.memory).mem_read_u8(addr)
             } else {
                 0
@@ -161,7 +161,7 @@ impl Cpu {
                 self.counter.wrapping_add(1).wrapping_add(offset as u16)
             }
             instruction::Mode::Implicit => IMPLICIT_MODE_ADDR,
-            instruction::Mode::Accumulator => IMPLICIT_MODE_ADDR
+            instruction::Mode::Accumulator => IMPLICIT_MODE_ADDR,
         }
     }
 
@@ -239,7 +239,7 @@ impl Cpu {
         self.branch_if(addr, |status| status.is_unset(register::Status::NEGATIVE))
     }
 
-    unsafe fn brk(&mut self){
+    unsafe fn brk(&mut self) {
         //https://www.nesdev.org/wiki/Status_flags
         self.push_u16_on_stack(self.counter);
         self.push_u8_on_stack((self.status | register::Status::BREAK).bits());
@@ -341,14 +341,16 @@ impl Cpu {
     }
 
     unsafe fn lsr(&mut self, operand: u8, addr: u16) {
-        self.status.set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
         let res = operand >> 1;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res);
     }
 
     fn lsr_a(&mut self) {
-        self.status.set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
         self.a >>= 1;
         self.set_negative_and_zero_flags(self.a);
     }
@@ -380,31 +382,51 @@ impl Cpu {
     }
 
     unsafe fn rol(&mut self, operand: u8, addr: u16) {
-        let carry = if self.status.is_set(register::Status::CARRY) { 1 } else {0 };
-        self.status.set_or_unset_if(register::Status::CARRY, || operand >> 7 == 1);
+        let carry = if self.status.is_set(register::Status::CARRY) {
+            1
+        } else {
+            0
+        };
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || operand >> 7 == 1);
         let res = (operand << 1) | carry;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res);
     }
 
     fn rol_a(&mut self) {
-        let carry = if self.status.is_set(register::Status::CARRY) { 1 } else {0 };
-        self.status.set_or_unset_if(register::Status::CARRY, || self.a >> 7 == 1);
+        let carry = if self.status.is_set(register::Status::CARRY) {
+            1
+        } else {
+            0
+        };
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || self.a >> 7 == 1);
         self.a = (self.a << 1) | carry;
         self.set_negative_and_zero_flags(self.a)
     }
 
     unsafe fn ror(&mut self, operand: u8, addr: u16) {
-        let carry = if self.status.is_set(register::Status::CARRY) { 1 } else {0 };
-        self.status.set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
-        let res =  operand >> 1 | carry << 7;
+        let carry = if self.status.is_set(register::Status::CARRY) {
+            1
+        } else {
+            0
+        };
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
+        let res = operand >> 1 | carry << 7;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res)
     }
 
     fn ror_a(&mut self) {
-        let carry = if self.status.is_set(register::Status::CARRY) { 1 } else {0 };
-        self.status.set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
+        let carry = if self.status.is_set(register::Status::CARRY) {
+            1
+        } else {
+            0
+        };
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
         self.a = self.a >> 1 | carry << 7;
         self.set_negative_and_zero_flags(self.a)
     }
@@ -423,7 +445,7 @@ impl Cpu {
     }
 
     fn sbc(&mut self, operand: u8) {
-        self.adc(operand.wrapping_neg().wrapping_sub(1)); // ? I kindof get the why But i don't really understand it ... oO? 
+        self.adc(operand.wrapping_neg().wrapping_sub(1)); // ? I kindof get the why But i don't really understand it ... oO?
     }
 
     fn sec(&mut self) {
@@ -498,7 +520,8 @@ impl Cpu {
 
     fn compare(&mut self, lhs: u8, rhs: u8) {
         let val = lhs.wrapping_sub(rhs);
-        self.status.set_or_unset_if(register::Status::CARRY, || val as i8 >= 0);
+        self.status
+            .set_or_unset_if(register::Status::CARRY, || val as i8 >= 0);
         self.set_negative_and_zero_flags(val);
     }
 
@@ -515,15 +538,15 @@ impl Cpu {
 
     unsafe fn pull_u8_from_stack(&mut self) -> u8 {
         self.stack_pointer = self.stack_pointer.wrapping_add(1);
-        let res  = (*self.memory).mem_read_u8(self.get_stack_addr());
+        let res = (*self.memory).mem_read_u8(self.get_stack_addr());
         res
     }
 
     unsafe fn pull_u16_from_stack(&mut self) -> u16 {
         self.stack_pointer = self.stack_pointer.wrapping_add(1);
-        let res  = (*self.memory).mem_read_u16(self.get_stack_addr());
+        let res = (*self.memory).mem_read_u16(self.get_stack_addr());
         self.stack_pointer = self.stack_pointer.wrapping_add(1);
-        res  
+        res
     }
 
     pub fn get_stack_addr(&self) -> u16 {

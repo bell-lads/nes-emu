@@ -39,7 +39,7 @@ fn create_mock_from_script(script: &str) -> MemoryMock {
 
 fn create_branch_forward_test_scipt(command: &str, value: u8) -> String {
     format!(
- r#"{command} forward
+        r#"{command} forward
     LDA #{value}
     STA $55
     {command} end
@@ -47,12 +47,13 @@ forward:
     LDA #33
     STA $55
 end:
-    BRK"#)
+    BRK"#
+    )
 }
 
 fn create_branch_backward_test_scipt(command: &str) -> String {
     format!(
- r#"{command} forward
+        r#"{command} forward
 backward:
     LDA #42
     STA $42
@@ -62,7 +63,8 @@ forward:
     LDA #99
     STA $42
 end:
-    BRK"#)
+    BRK"#
+    )
 }
 
 #[test]
@@ -151,9 +153,7 @@ fn bcc_forward() {
     let script = create_branch_forward_test_scipt("BCC", 10);
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(33, mock.memory[0x55])
 }
 
@@ -162,9 +162,7 @@ fn bcc_backward() {
     let script = create_branch_backward_test_scipt("BCC");
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
@@ -173,9 +171,7 @@ fn bpl_forward() {
     let script = create_branch_forward_test_scipt("BPL", 10);
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(33, mock.memory[0x55])
 }
 
@@ -184,9 +180,7 @@ fn bpl_backward() {
     let script = create_branch_backward_test_scipt("BPL");
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
@@ -195,9 +189,7 @@ fn bvc_forward() {
     let script = create_branch_forward_test_scipt("BVC", 10);
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(33, mock.memory[0x55])
 }
 
@@ -206,9 +198,7 @@ fn bvc_backward() {
     let script = create_branch_backward_test_scipt("BVC");
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
@@ -217,9 +207,7 @@ fn bne_forward() {
     let script = create_branch_forward_test_scipt("BNE", 10);
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(33, mock.memory[0x55])
 }
 
@@ -228,34 +216,30 @@ fn bne_backward() {
     let script = create_branch_backward_test_scipt("BNE");
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
 #[test]
 fn beq_forward() {
     let mut mock = create_mock_from_script(
-r#" LDA #0
+        r#" LDA #0
     BEQ forward
     LDY #99
     STY $42
 forward:
     LDY #42
-    STY $42"#
+    STY $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
 #[test]
 fn beq_backward() {
     let mut mock = create_mock_from_script(
-r#"BCC forward
+        r#"BCC forward
 backward:
     LDX #42
     STX $42
@@ -267,12 +251,10 @@ forward:
     LDA #0
     BEQ backward
 end:
-    BRK"#
+    BRK"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
@@ -281,108 +263,98 @@ fn bmi_forward() {
     let script = create_branch_forward_test_scipt("BMI", 10u8.wrapping_neg());
     let mut mock = create_mock_from_script(&script);
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(10u8.wrapping_neg(), mock.memory[0x55])
 }
 
 #[test]
-fn adc_without_carry(){
+fn adc_without_carry() {
     let mut mock = create_mock_from_script(
- r#"LDA #30
+        r#"LDA #30
     ADC #12
-    STA $42"# 
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
 #[test]
-fn adc_signed_without_carry(){
-    let mut mock = create_mock_from_script(format!(
- r#"LDA #30
+fn adc_signed_without_carry() {
+    let mut mock = create_mock_from_script(
+        format!(
+            r#"LDA #30
     ADC #{}
-    STA $42"#, 
-    40u8.wrapping_neg()).as_ref());
+    STA $42"#,
+            40u8.wrapping_neg()
+        )
+        .as_ref(),
+    );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(10u8.wrapping_neg(), mock.memory[0x42])
 }
 
 #[test]
-fn adc_with_carry(){
+fn adc_with_carry() {
     let mut mock = create_mock_from_script(
- r#"LDA #255
+        r#"LDA #255
     ADC #2
     BCS end
     STA $42
 end:
     LDA #42
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
 #[test]
-fn adc_with_overflow(){
+fn adc_with_overflow() {
     let mut mock = create_mock_from_script(
- r#"LDA #80
+        r#"LDA #80
     ADC #80
     BVS end
     STA $42
 end:
     LDA #42
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42])
 }
 
 #[test]
-fn test_and_1(){
+fn test_and_1() {
     let mut mock = create_mock_from_script(
- r#"LDA #%11110000
+        r#"LDA #%11110000
     AND #%00001111
-    STA $00"#
+    STA $00"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(0b0000_0000, mock.memory[0x00])
 }
 
 #[test]
-fn test_and_2(){
+fn test_and_2() {
     let mut mock = create_mock_from_script(
- r#"LDA #%01010101
+        r#"LDA #%01010101
     AND #%10011001
-    STA $00"#
+    STA $00"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(0b0001_0001, mock.memory[0x00])
 }
 
 #[test]
-fn test_sec(){
+fn test_sec() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     BCS good
     LDX #99
     STX $1ABC
@@ -391,19 +363,17 @@ good:
     LDX #42
     STX $1ABC
 end:
-    BRK"#
+    BRK"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x1ABC])
 }
 
 #[test]
-fn test_clc(){
+fn test_clc() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     CLC
     BCC good
     LDX #99
@@ -413,19 +383,17 @@ good:
     LDX #42
     STX $1ABC
 end:
-    BRK"#
+    BRK"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x1ABC])
 }
 
 #[test]
-fn test_clv(){
+fn test_clv() {
     let mut mock = create_mock_from_script(
- r#"LDA #80
+        r#"LDA #80
     ADC #80
     CLV
     BVC good
@@ -436,20 +404,17 @@ good:
     LDX #42
     STX $1ABC
 end:
-    BRK"#
+    BRK"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x1ABC])
 }
 
-
 #[test]
-fn test_asl_a_and_bcs(){
+fn test_asl_a_and_bcs() {
     let mut mock = create_mock_from_script(
- r#"LDA $05
+        r#"LDA $05
     ASL A
     STA $10
     BCS end
@@ -457,7 +422,7 @@ fn test_asl_a_and_bcs(){
     STX $0042
 end:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -469,9 +434,9 @@ end:
 }
 
 #[test]
-fn test_asl_and_bcs(){
+fn test_asl_and_bcs() {
     let mut mock = create_mock_from_script(
- r#"ASL $05
+        r#"ASL $05
     LDA $05
     STA $10
     BCS end
@@ -479,7 +444,7 @@ fn test_asl_and_bcs(){
     STX $0042
 end:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -491,16 +456,16 @@ end:
 }
 
 #[test]
-fn test_cmp_bmi(){
+fn test_cmp_bmi() {
     let mut mock = create_mock_from_script(
- r#"LDA #10
+        r#"LDA #10
     CMP $00
     BMI inferior
     LDX #99
     STX $0042
 inferior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -511,16 +476,16 @@ inferior:
 }
 
 #[test]
-fn test_cmp_bpl(){
+fn test_cmp_bpl() {
     let mut mock = create_mock_from_script(
- r#"LDA #20
+        r#"LDA #20
     CMP $00
     BPL superior
     LDX #99
     STX $0042
 superior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -531,16 +496,16 @@ superior:
 }
 
 #[test]
-fn test_cmp_beq(){
+fn test_cmp_beq() {
     let mut mock = create_mock_from_script(
- r#"LDA #15
+        r#"LDA #15
     CMP $00
     BEQ equal
     LDX #99
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -551,16 +516,16 @@ equal:
 }
 
 #[test]
-fn test_cpx_bmi(){
+fn test_cpx_bmi() {
     let mut mock = create_mock_from_script(
- r#"LDX #10
+        r#"LDX #10
     CPX $00
     BMI inferior
     LDX #99
     STX $0042
 inferior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -571,16 +536,16 @@ inferior:
 }
 
 #[test]
-fn test_cpx_bpl(){
+fn test_cpx_bpl() {
     let mut mock = create_mock_from_script(
- r#"LDX #20
+        r#"LDX #20
     CPX $00
     BPL superior
     LDX #99
     STX $0042
 superior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -591,16 +556,16 @@ superior:
 }
 
 #[test]
-fn test_cpx_beq(){
+fn test_cpx_beq() {
     let mut mock = create_mock_from_script(
- r#"LDX #15
+        r#"LDX #15
     CPX $00
     BEQ equal
     LDX #99
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -611,16 +576,16 @@ equal:
 }
 
 #[test]
-fn test_cpy_bmi(){
+fn test_cpy_bmi() {
     let mut mock = create_mock_from_script(
- r#"LDY #10
+        r#"LDY #10
     CPY $00
     BMI inferior
     LDX #99
     STX $0042
 inferior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -631,16 +596,16 @@ inferior:
 }
 
 #[test]
-fn test_cpy_bpl(){
+fn test_cpy_bpl() {
     let mut mock = create_mock_from_script(
- r#"LDY #20
+        r#"LDY #20
     CPY $00
     BPL superior
     LDX #99
     STX $0042
 superior:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -651,16 +616,16 @@ superior:
 }
 
 #[test]
-fn test_cpy_beq(){
+fn test_cpy_beq() {
     let mut mock = create_mock_from_script(
- r#"LDY #15
+        r#"LDY #15
     CPY $00
     BEQ equal
     LDX #99
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -671,9 +636,9 @@ equal:
 }
 
 #[test]
-fn test_dec_beq(){
+fn test_dec_beq() {
     let mut mock = create_mock_from_script(
- r#"DEC $00
+        r#"DEC $00
     LDA $00
     CMP #9
     BEQ equal
@@ -681,7 +646,7 @@ fn test_dec_beq(){
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -692,9 +657,9 @@ equal:
 }
 
 #[test]
-fn test_dex_beq(){
+fn test_dex_beq() {
     let mut mock = create_mock_from_script(
- r#"LDX $00
+        r#"LDX $00
     DEX
     CPX #9
     BEQ equal
@@ -702,7 +667,7 @@ fn test_dex_beq(){
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -713,9 +678,9 @@ equal:
 }
 
 #[test]
-fn test_dey_beq(){
+fn test_dey_beq() {
     let mut mock = create_mock_from_script(
- r#"LDY $00
+        r#"LDY $00
     DEY
     CPY #9
     BEQ equal
@@ -723,7 +688,7 @@ fn test_dey_beq(){
     STX $0042
 equal:
     LDX #42
-    STX $0042"#
+    STX $0042"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -734,11 +699,11 @@ equal:
 }
 
 #[test]
-fn test_eor(){
+fn test_eor() {
     let mut mock = create_mock_from_script(
- r#"LDA $12
+        r#"LDA $12
     EOR #%10101010
-    STA $12"#
+    STA $12"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -749,10 +714,8 @@ fn test_eor(){
 }
 
 #[test]
-fn test_inc(){
-    let mut mock = create_mock_from_script(
- r#"INC $12"#
-    );
+fn test_inc() {
+    let mut mock = create_mock_from_script(r#"INC $12"#);
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
         mock.mem_write_u8(0x12, 9);
@@ -762,11 +725,11 @@ fn test_inc(){
 }
 
 #[test]
-fn test_inx(){
+fn test_inx() {
     let mut mock = create_mock_from_script(
- r#"LDX $12
+        r#"LDX $12
     INX
-    STX $42"#
+    STX $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -777,11 +740,11 @@ fn test_inx(){
 }
 
 #[test]
-fn test_iny(){
+fn test_iny() {
     let mut mock = create_mock_from_script(
- r#"LDY $12
+        r#"LDY $12
     INY
-    STY $42"#
+    STY $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -792,9 +755,9 @@ fn test_iny(){
 }
 
 #[test]
-fn test_lsr_a_and_bcs(){
+fn test_lsr_a_and_bcs() {
     let mut mock = create_mock_from_script(
- r#"LDA $AB
+        r#"LDA $AB
     LSR A
     STA $AB
     BCS carryset
@@ -802,7 +765,7 @@ fn test_lsr_a_and_bcs(){
     STX $42
 carryset:
     LDX #42
-    STX $42"#
+    STX $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -814,15 +777,15 @@ carryset:
 }
 
 #[test]
-fn test_lsr_and_bcs(){
+fn test_lsr_and_bcs() {
     let mut mock = create_mock_from_script(
- r#"LSR $AB
+        r#"LSR $AB
     BCS carryset
     LDX #99
     STX $42
 carryset:
     LDX #42
-    STX $42"#
+    STX $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -834,11 +797,11 @@ carryset:
 }
 
 #[test]
-fn test_ora(){
+fn test_ora() {
     let mut mock = create_mock_from_script(
- r#"LDA $AB
+        r#"LDA $AB
     ORA #%00001111
-    STA $BA"#
+    STA $BA"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -849,38 +812,34 @@ fn test_ora(){
 }
 
 #[test]
-fn test_pha(){
+fn test_pha() {
     let mut mock = create_mock_from_script(
- r#"LDA #42
-    PHA"#
+        r#"LDA #42
+    PHA"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x01FF]);
 }
 
 #[test]
-fn test_pla(){
+fn test_pla() {
     let mut mock = create_mock_from_script(
- r#"LDA #42
+        r#"LDA #42
     PHA
     LDA #0
     PLA
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42]);
 }
 
 #[test]
-fn test_rol_a(){
+fn test_rol_a() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     LDA $AB
     ROL A
     STA $42
@@ -889,7 +848,7 @@ fn test_rol_a(){
     STA $AB
 end:
     LDA #42
-    STA $AB"#
+    STA $AB"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -901,16 +860,16 @@ end:
 }
 
 #[test]
-fn test_rol(){
+fn test_rol() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     ROL $AB
     BCS end
     LDA #99
     STA $42
 end:
     LDA #42
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -922,9 +881,9 @@ end:
 }
 
 #[test]
-fn test_ror_a(){
+fn test_ror_a() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     LDA $AB
     ROR A
     STA $42
@@ -934,7 +893,7 @@ fn test_ror_a(){
     BRK
 end:
     LDA #42
-    STA $AB"#
+    STA $AB"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -946,9 +905,9 @@ end:
 }
 
 #[test]
-fn test_ror(){
+fn test_ror() {
     let mut mock = create_mock_from_script(
- r#"SEC
+        r#"SEC
     ROR $AB
     BCC end
     LDA #99
@@ -956,7 +915,7 @@ fn test_ror(){
     BRK
 end:
     LDA #42
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
     unsafe {
@@ -967,68 +926,58 @@ end:
     assert_eq!(42, mock.memory[0x42]);
 }
 
-
 #[test]
-fn test_tax(){
+fn test_tax() {
     let mut mock = create_mock_from_script(
- r#"LDA #42
+        r#"LDA #42
     TAX
-    STX $42"#
+    STX $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42]);
 }
 
 #[test]
-fn test_txa(){
+fn test_txa() {
     let mut mock = create_mock_from_script(
- r#"LDX #42
+        r#"LDX #42
     TXA
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42]);
 }
 
 #[test]
-fn test_tay(){
+fn test_tay() {
     let mut mock = create_mock_from_script(
- r#"LDA #42
+        r#"LDA #42
     TAY
-    STY $42"#
+    STY $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42]);
 }
 
-
 #[test]
-fn test_tya(){
+fn test_tya() {
     let mut mock = create_mock_from_script(
- r#"LDY #42
+        r#"LDY #42
     TYA
-    STA $42"#
+    STA $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(42, mock.memory[0x42]);
 }
 
 #[test]
-fn test_txs(){
+fn test_txs() {
     let mut mock = create_mock_from_script(
- r#"LDA #1
+        r#"LDA #1
     PHA
     LDA #2
     PHA
@@ -1042,26 +991,22 @@ fn test_txs(){
     TAX
     STX $42
     PLA
-    STA $43"#
+    STA $43"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(30, mock.memory[0x42]);
     assert_eq!(10, mock.memory[0x43]);
 }
 
 #[test]
-fn test_tsx(){
+fn test_tsx() {
     let mut mock = create_mock_from_script(
- r#"PHA
+        r#"PHA
     TSX
-    STX $42"#
+    STX $42"#,
     );
     let mut cpu = Cpu::new(&mut mock);
-    unsafe {
-        cpu.run()
-    }
+    unsafe { cpu.run() }
     assert_eq!(0xFE, mock.memory[0x42]);
 }
