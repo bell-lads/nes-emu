@@ -46,7 +46,6 @@ impl Cpu {
             }
             self.counter += 1;
             let previous_position = self.counter;
-            println!("{:?}", instruct);
             let addr = self.get_operand_address(&instruct.mode);
             let operand = if addr != IMPLICIT_MODE_ADDR { 
                 (*self.memory).mem_read_u8(addr)
@@ -217,14 +216,10 @@ impl Cpu {
     }
 
     fn bcc(&mut self, addr: u16) {
-        println!("{}", self.status.is_unset(register::Status::CARRY));
-        println!("{}", self.status.is_set(register::Status::CARRY));
         self.branch_if(addr, |status| status.is_unset(register::Status::CARRY))
     }
 
     fn bcs(&mut self, addr: u16) {
-        println!("{}", self.status.is_unset(register::Status::CARRY));
-        println!("{}", self.status.is_set(register::Status::CARRY));
         self.branch_if(addr, |status| status.is_set(register::Status::CARRY))
     }
 
@@ -366,9 +361,7 @@ impl Cpu {
     }
 
     unsafe fn pha(&mut self) {
-        println!("pha : {}", self.a);
         self.push_u8_on_stack(self.a);
-        println!("pha stack pointer: {:#04x?}", self.stack_pointer);
     }
 
     unsafe fn php(&mut self) {
@@ -412,7 +405,6 @@ impl Cpu {
     fn ror_a(&mut self) {
         let carry = if self.status.is_set(register::Status::CARRY) { 1 } else {0 };
         self.status.set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
-        println!("{}", self.status.is_set(register::Status::CARRY));
         self.a = self.a >> 1 | carry << 7;
         self.set_negative_and_zero_flags(self.a)
     }
@@ -511,7 +503,6 @@ impl Cpu {
     }
 
     unsafe fn push_u8_on_stack(&mut self, byte: u8) {
-        println!("push u8 {byte}");
         (*self.memory).mem_write_u8(self.get_stack_addr(), byte);
         self.stack_pointer = self.stack_pointer.wrapping_sub(1);
     }
