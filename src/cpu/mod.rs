@@ -1,9 +1,8 @@
 mod instruction;
 mod register;
 
-use instruction::INSTRUCTION_MAP;
-
 use crate::traits::Memory;
+use instruction::{AddressingMode, Instruction, InstructionKind};
 
 const PROGRAM_POINTER: u16 = 0xFFFC;
 const STACK_ADDR_HI: register::StackPointer = 0x01;
@@ -35,133 +34,133 @@ impl Cpu {
 
     #[allow(clippy::missing_safety_doc)]
     #[rustfmt::skip]
-    pub unsafe fn run(&mut self)
-    {
+    pub unsafe fn run(&mut self) {
         self.counter = (*self.memory).mem_read_u16(PROGRAM_POINTER);
         loop {
-            let instruct = INSTRUCTION_MAP.get(&(*self.memory).mem_read_u8(self.counter)).unwrap();
-            if instruct.opcode == 0 {
+            let opcode = (*self.memory).mem_read_u8(self.counter);
+            let instruction = Instruction::from_opcode(opcode);
+            if instruction.kind() == InstructionKind::Brk {
                 self.brk();
                 break
             }
             self.counter += 1;
             let previous_position = self.counter;
-            let addr = self.get_operand_address(&instruct.mode);
+            let addr = self.get_operand_address(&instruction.addressing_mode());
             let operand = if addr != IMPLICIT_MODE_ADDR {
                 (*self.memory).mem_read_u8(addr)
             } else {
                 0
             };
-            match instruct.name {
-                instruction::Name::Adc => self.adc(operand),//tested
-                instruction::Name::And => self.and(operand),//tested
-                instruction::Name::Asl if instruct.mode == instruction::Mode::Accumulator
+            match instruction.kind() {
+                InstructionKind::Adc => self.adc(operand),//tested
+                InstructionKind::And => self.and(operand),//tested
+                InstructionKind::Asl if instruction.addressing_mode() == AddressingMode::Accumulator
                                        => self.asl_a(),
-                instruction::Name::Asl => self.asl(operand, addr),
-                instruction::Name::Bit => self.bit(operand),
-                instruction::Name::Bcc => self.bcc(addr),//tested
-                instruction::Name::Bcs => self.bcs(addr),//tested
-                instruction::Name::Beq => self.beq(addr),//tested
-                instruction::Name::Bmi => self.bmi(addr),//tested
-                instruction::Name::Bne => self.bne(addr),//tested
-                instruction::Name::Bpl => self.bpl(addr),//tested
-                instruction::Name::Bvc => self.bvc(addr),//tested
-                instruction::Name::Bvs => self.bvs(addr),//tested
-                instruction::Name::Clc => self.clc(),//tested
-                instruction::Name::Cld => self.cld(),
-                instruction::Name::Cli => self.cli(),
-                instruction::Name::Clv => self.clv(),//tested
-                instruction::Name::Cmp => self.cmp(operand),//tested
-                instruction::Name::Cpx => self.cpx(operand),//tested 
-                instruction::Name::Cpy => self.cpy(operand),//tested
-                instruction::Name::Dec => self.dec(operand, addr),//tested
-                instruction::Name::Dex => self.dex(),//tested
-                instruction::Name::Dey => self.dey(),//tested
-                instruction::Name::Eor => self.eor(operand), //tested
-                instruction::Name::Inc => self.inc(operand, addr), //tested
-                instruction::Name::Inx => self.inx(),//tested
-                instruction::Name::Iny => self.iny(),//tested
-                instruction::Name::Jmp => self.jmp(addr),
-                instruction::Name::Jsr => self.jsr(addr),
-                instruction::Name::Lda => self.lda(operand),//tested
-                instruction::Name::Ldx => self.ldx(operand),//tested
-                instruction::Name::Ldy => self.ldy(operand),//tested
-                instruction::Name::Lsr if instruct.mode == instruction::Mode::Accumulator
+                InstructionKind::Asl => self.asl(operand, addr),
+                InstructionKind::Bit => self.bit(operand),
+                InstructionKind::Bcc => self.bcc(addr),//tested
+                InstructionKind::Bcs => self.bcs(addr),//tested
+                InstructionKind::Beq => self.beq(addr),//tested
+                InstructionKind::Bmi => self.bmi(addr),//tested
+                InstructionKind::Bne => self.bne(addr),//tested
+                InstructionKind::Bpl => self.bpl(addr),//tested
+                InstructionKind::Bvc => self.bvc(addr),//tested
+                InstructionKind::Bvs => self.bvs(addr),//tested
+                InstructionKind::Clc => self.clc(),//tested
+                InstructionKind::Cld => self.cld(),
+                InstructionKind::Cli => self.cli(),
+                InstructionKind::Clv => self.clv(),//tested
+                InstructionKind::Cmp => self.cmp(operand),//tested
+                InstructionKind::Cpx => self.cpx(operand),//tested 
+                InstructionKind::Cpy => self.cpy(operand),//tested
+                InstructionKind::Dec => self.dec(operand, addr),//tested
+                InstructionKind::Dex => self.dex(),//tested
+                InstructionKind::Dey => self.dey(),//tested
+                InstructionKind::Eor => self.eor(operand), //tested
+                InstructionKind::Inc => self.inc(operand, addr), //tested
+                InstructionKind::Inx => self.inx(),//tested
+                InstructionKind::Iny => self.iny(),//tested
+                InstructionKind::Jmp => self.jmp(addr),
+                InstructionKind::Jsr => self.jsr(addr),
+                InstructionKind::Lda => self.lda(operand),//tested
+                InstructionKind::Ldx => self.ldx(operand),//tested
+                InstructionKind::Ldy => self.ldy(operand),//tested
+                InstructionKind::Lsr if instruction.addressing_mode() == AddressingMode::Accumulator
                                        => self.lsr_a(),//tested
-                instruction::Name::Lsr => self.lsr(operand, addr),//tested
-                instruction::Name::Nop => self.nop(),
-                instruction::Name::Ora => self.ora(operand),//tested
-                instruction::Name::Pha => self.pha(), //tested
-                instruction::Name::Php => self.php(),
-                instruction::Name::Pla => self.pla(), //tested
-                instruction::Name::Plp => self.plp(),
-                instruction::Name::Rol if instruct.mode == instruction::Mode::Accumulator
+                InstructionKind::Lsr => self.lsr(operand, addr),//tested
+                InstructionKind::Nop => self.nop(),
+                InstructionKind::Ora => self.ora(operand),//tested
+                InstructionKind::Pha => self.pha(), //tested
+                InstructionKind::Php => self.php(),
+                InstructionKind::Pla => self.pla(), //tested
+                InstructionKind::Plp => self.plp(),
+                InstructionKind::Rol if instruction.addressing_mode() == AddressingMode::Accumulator
                                        => self.rol_a(), //tested
-                instruction::Name::Rol => self.rol(operand, addr),//tested
-                instruction::Name::Ror if instruct.mode == instruction::Mode::Accumulator
+                InstructionKind::Rol => self.rol(operand, addr),//tested
+                InstructionKind::Ror if instruction.addressing_mode() == AddressingMode::Accumulator
                                        => self.ror_a(),//tested
-                instruction::Name::Ror => self.ror(operand, addr),//tested
-                instruction::Name::Rti => self.rti(),
-                instruction::Name::Rts => self.rts(),
-                instruction::Name::Sbc => self.sbc(operand),
-                instruction::Name::Sec => self.sec(),//tested
-                instruction::Name::Sed => self.sed(),
-                instruction::Name::Sei => self.sei(),
-                instruction::Name::Sta => self.sta(addr),//tested
-                instruction::Name::Stx => self.stx(addr),//tested
-                instruction::Name::Sty => self.sty(addr),//testes,
-                instruction::Name::Tax => self.tax(),//tested
-                instruction::Name::Tay => self.tay(),//tested
-                instruction::Name::Tsx => self.tsx(),
-                instruction::Name::Txa => self.txa(),//tested
-                instruction::Name::Txs => self.txs(),
-                instruction::Name::Tya => self.tya(),//tested
+                InstructionKind::Ror => self.ror(operand, addr),//tested
+                InstructionKind::Rti => self.rti(),
+                InstructionKind::Rts => self.rts(),
+                InstructionKind::Sbc => self.sbc(operand),
+                InstructionKind::Sec => self.sec(),//tested
+                InstructionKind::Sed => self.sed(),
+                InstructionKind::Sei => self.sei(),
+                InstructionKind::Sta => self.sta(addr),//tested
+                InstructionKind::Stx => self.stx(addr),//tested
+                InstructionKind::Sty => self.sty(addr),//testes,
+                InstructionKind::Tax => self.tax(),//tested
+                InstructionKind::Tay => self.tay(),//tested
+                InstructionKind::Tsx => self.tsx(),
+                InstructionKind::Txa => self.txa(),//tested
+                InstructionKind::Txs => self.txs(),
+                InstructionKind::Tya => self.tya(),//tested
                 _ => todo!()
             }
             if !self.has_branched(previous_position) {
-                self.counter += u16::from(instruct.len - 1);
+                self.counter += instruction.addressing_mode().length_in_bytes();
             }
         }
     }
 
-    unsafe fn get_operand_address(&mut self, mode: &instruction::Mode) -> u16 {
+    unsafe fn get_operand_address(&mut self, mode: &AddressingMode) -> u16 {
         match mode {
-            instruction::Mode::Absolute => (*self.memory).mem_read_u16(self.counter),
-            instruction::Mode::AbsoluteX => (*self.memory)
+            AddressingMode::Absolute => (*self.memory).mem_read_u16(self.counter),
+            AddressingMode::AbsoluteX => (*self.memory)
                 .mem_read_u16(self.counter)
                 .wrapping_add(self.x as u16),
-            instruction::Mode::AbsoluteY => (*self.memory)
+            AddressingMode::AbsoluteY => (*self.memory)
                 .mem_read_u16(self.counter)
                 .wrapping_add(self.y as u16),
-            instruction::Mode::Indirect => {
+            AddressingMode::Indirect => {
                 let addr = (*self.memory).mem_read_u16(self.counter);
                 (*self.memory).mem_read_u16(addr)
             }
-            instruction::Mode::IndirectX => {
+            AddressingMode::IndirectX => {
                 let addr = (*self.memory)
                     .mem_read_u8(self.counter)
                     .wrapping_add(self.x);
                 (*self.memory).mem_read_u16(addr as u16)
             }
-            instruction::Mode::IndirectY => {
+            AddressingMode::IndirectY => {
                 let addr =
                     (*self.memory).mem_read_u16((*self.memory).mem_read_u8(self.counter) as u16);
                 addr.wrapping_add(self.y as u16)
             }
-            instruction::Mode::ZeroPage => (*self.memory).mem_read_u8(self.counter) as u16,
-            instruction::Mode::ZeroPageX => (*self.memory)
+            AddressingMode::ZeroPage => (*self.memory).mem_read_u8(self.counter) as u16,
+            AddressingMode::ZeroPageX => (*self.memory)
                 .mem_read_u8(self.counter)
                 .wrapping_add(self.x) as u16,
-            instruction::Mode::ZeroPageY => (*self.memory)
+            AddressingMode::ZeroPageY => (*self.memory)
                 .mem_read_u8(self.counter)
                 .wrapping_add(self.y) as u16,
-            instruction::Mode::Immediate => self.counter,
-            instruction::Mode::Relative => {
+            AddressingMode::Immediate => self.counter,
+            AddressingMode::Relative => {
                 let offset = (*self.memory).mem_read_u8(self.counter) as i8;
                 self.counter.wrapping_add(1).wrapping_add(offset as u16)
             }
-            instruction::Mode::Implicit => IMPLICIT_MODE_ADDR,
-            instruction::Mode::Accumulator => IMPLICIT_MODE_ADDR,
+            AddressingMode::Implicit => IMPLICIT_MODE_ADDR,
+            AddressingMode::Accumulator => IMPLICIT_MODE_ADDR,
         }
     }
 
