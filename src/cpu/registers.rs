@@ -1,13 +1,16 @@
 use bitflags::bitflags;
 
-pub type ProgramCounter = u16;
-pub type A = u8;
-pub type X = u8;
-pub type Y = u8;
-pub type StackPointer = u8;
+pub struct Registers {
+    pub a: u8,
+    pub x: u8,
+    pub y: u8,
+    pub program_counter: u16,
+    pub stack_pointer: u8,
+    pub status_flags: StatusFlags,
+}
 
 bitflags! {
-    pub struct Status: u8 {
+    pub struct StatusFlags: u8 {
         const NEGATIVE =            0b1000_0000;
         const OVERFLOW =            0b0100_0000;
         const UNUSED =              0b0010_0000;
