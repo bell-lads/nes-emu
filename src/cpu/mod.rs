@@ -168,7 +168,7 @@ impl Cpu {
         // no decimal mode.
         let sum = self.a as u16
             + operand as u16
-            + if self.status.is_set(register::Status::CARRY) {
+            + if self.status.contains(register::Status::CARRY) {
                 1
             } else {
                 0
@@ -213,27 +213,27 @@ impl Cpu {
     }
 
     fn bcc(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_unset(register::Status::CARRY))
+        self.branch_if(addr, |status| !status.contains(register::Status::CARRY))
     }
 
     fn bcs(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_set(register::Status::CARRY))
+        self.branch_if(addr, |status| status.contains(register::Status::CARRY))
     }
 
     fn beq(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_set(register::Status::ZERO))
+        self.branch_if(addr, |status| status.contains(register::Status::ZERO))
     }
 
     fn bmi(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_set(register::Status::NEGATIVE))
+        self.branch_if(addr, |status| status.contains(register::Status::NEGATIVE))
     }
 
     fn bne(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_unset(register::Status::ZERO))
+        self.branch_if(addr, |status| !status.contains(register::Status::ZERO))
     }
 
     fn bpl(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_unset(register::Status::NEGATIVE))
+        self.branch_if(addr, |status| !status.contains(register::Status::NEGATIVE))
     }
 
     unsafe fn brk(&mut self) {
@@ -245,11 +245,11 @@ impl Cpu {
     }
 
     fn bvc(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_unset(register::Status::OVERFLOW))
+        self.branch_if(addr, |status| !status.contains(register::Status::OVERFLOW))
     }
 
     fn bvs(&mut self, addr: u16) {
-        self.branch_if(addr, |status| status.is_set(register::Status::OVERFLOW))
+        self.branch_if(addr, |status| status.contains(register::Status::OVERFLOW))
     }
 
     fn clc(&mut self) {
@@ -377,7 +377,7 @@ impl Cpu {
     }
 
     unsafe fn rol(&mut self, operand: u8, addr: u16) {
-        let carry = if self.status.is_set(register::Status::CARRY) {
+        let carry = if self.status.contains(register::Status::CARRY) {
             1
         } else {
             0
@@ -389,7 +389,7 @@ impl Cpu {
     }
 
     fn rol_a(&mut self) {
-        let carry = if self.status.is_set(register::Status::CARRY) {
+        let carry = if self.status.contains(register::Status::CARRY) {
             1
         } else {
             0
@@ -400,7 +400,7 @@ impl Cpu {
     }
 
     unsafe fn ror(&mut self, operand: u8, addr: u16) {
-        let carry = if self.status.is_set(register::Status::CARRY) {
+        let carry = if self.status.contains(register::Status::CARRY) {
             1
         } else {
             0
@@ -412,7 +412,7 @@ impl Cpu {
     }
 
     fn ror_a(&mut self) {
-        let carry = if self.status.is_set(register::Status::CARRY) {
+        let carry = if self.status.contains(register::Status::CARRY) {
             1
         } else {
             0

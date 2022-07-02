@@ -19,13 +19,3 @@ bitflags! {
         const INITIAL_STATE = Self::INTERRUPT_DISABLE.bits() | Self::UNUSED.bits();
     }
 }
-
-impl Status {
-    pub fn is_set(&self, flag: Status) -> bool {
-        self.contains(flag)
-    }
-
-    pub fn is_unset(&self, flag: Status) -> bool {
-        !self.is_set(flag)
-    }
-}
