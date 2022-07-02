@@ -173,13 +173,13 @@ impl Cpu {
             } else {
                 0
             };
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || sum > 0xFF);
+        self.status.set(register::Status::CARRY, sum > 0xFF);
         let res = sum as u8;
         //https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-        self.status.set_or_unset_if(register::Status::OVERFLOW, || {
-            (self.a ^ res) & (operand ^ res) & 0x80 != 0
-        });
+        self.status.set(
+            register::Status::OVERFLOW,
+            (self.a ^ res) & (operand ^ res) & 0x80 != 0,
+        );
         self.a = res;
         self.set_negative_and_zero_flags(res)
     }
@@ -190,16 +190,14 @@ impl Cpu {
     }
 
     unsafe fn asl(&mut self, operand: u8, addr: u16) {
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || operand >> 7 == 1);
+        self.status.set(register::Status::CARRY, operand >> 7 == 1);
         let res = operand << 1;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res)
     }
 
     fn asl_a(&mut self) {
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || self.a >> 7 == 1);
+        self.status.set(register::Status::CARRY, self.a >> 7 == 1);
         self.a <<= 1;
         self.set_negative_and_zero_flags(self.a);
     }
@@ -207,11 +205,11 @@ impl Cpu {
     #[allow(clippy::bad_bit_mask)]
     fn bit(&mut self, operand: u8) {
         self.status
-            .set_or_unset_if(register::Status::ZERO, || self.a & operand == 0);
+            .set(register::Status::ZERO, self.a & operand == 0);
         self.status
-            .set_or_unset_if(register::Status::NEGATIVE, || operand & 0b1000_0000 == 1);
+            .set(register::Status::NEGATIVE, operand & 0b1000_0000 == 1);
         self.status
-            .set_or_unset_if(register::Status::OVERFLOW, || operand & 0b0100_0000 == 1);
+            .set(register::Status::OVERFLOW, operand & 0b0100_0000 == 1);
     }
 
     fn bcc(&mut self, addr: u16) {
@@ -340,16 +338,14 @@ impl Cpu {
     }
 
     unsafe fn lsr(&mut self, operand: u8, addr: u16) {
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
+        self.status.set(register::Status::CARRY, operand & 1 == 1);
         let res = operand >> 1;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res);
     }
 
     fn lsr_a(&mut self) {
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
+        self.status.set(register::Status::CARRY, self.a & 1 == 1);
         self.a >>= 1;
         self.set_negative_and_zero_flags(self.a);
     }
@@ -386,8 +382,7 @@ impl Cpu {
         } else {
             0
         };
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || operand >> 7 == 1);
+        self.status.set(register::Status::CARRY, operand >> 7 == 1);
         let res = (operand << 1) | carry;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res);
@@ -399,8 +394,7 @@ impl Cpu {
         } else {
             0
         };
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || self.a >> 7 == 1);
+        self.status.set(register::Status::CARRY, self.a >> 7 == 1);
         self.a = (self.a << 1) | carry;
         self.set_negative_and_zero_flags(self.a)
     }
@@ -411,8 +405,7 @@ impl Cpu {
         } else {
             0
         };
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || operand & 1 == 1);
+        self.status.set(register::Status::CARRY, operand & 1 == 1);
         let res = operand >> 1 | carry << 7;
         self.set_negative_and_zero_flags(res);
         (*self.memory).mem_write_u8(addr, res)
@@ -424,8 +417,7 @@ impl Cpu {
         } else {
             0
         };
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || self.a & 1 == 1);
+        self.status.set(register::Status::CARRY, self.a & 1 == 1);
         self.a = self.a >> 1 | carry << 7;
         self.set_negative_and_zero_flags(self.a)
     }
@@ -498,9 +490,8 @@ impl Cpu {
 
     fn set_negative_and_zero_flags(&mut self, operation_res: u8) {
         self.status
-            .set_or_unset_if(register::Status::NEGATIVE, || (operation_res as i8) < 0);
-        self.status
-            .set_or_unset_if(register::Status::ZERO, || operation_res == 0);
+            .set(register::Status::NEGATIVE, (operation_res as i8) < 0);
+        self.status.set(register::Status::ZERO, operation_res == 0);
     }
 
     fn branch_if(&mut self, addr: u16, predicate: impl Fn(&register::Status) -> bool) {
@@ -519,8 +510,7 @@ impl Cpu {
 
     fn compare(&mut self, lhs: u8, rhs: u8) {
         let val = lhs.wrapping_sub(rhs);
-        self.status
-            .set_or_unset_if(register::Status::CARRY, || val as i8 >= 0);
+        self.status.set(register::Status::CARRY, val as i8 >= 0);
         self.set_negative_and_zero_flags(val);
     }
 

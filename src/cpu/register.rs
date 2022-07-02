@@ -28,12 +28,4 @@ impl Status {
     pub fn is_unset(&self, flag: Status) -> bool {
         !self.is_set(flag)
     }
-
-    pub fn set_or_unset_if(&mut self, flag: Status, predicate: impl Fn() -> bool) {
-        if predicate() {
-            self.insert(flag)
-        } else {
-            self.remove(flag)
-        }
-    }
 }
