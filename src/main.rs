@@ -53,12 +53,12 @@ impl Component for App {
                 let key_pressed = self.key_pressed.cast::<HtmlSpanElement>().unwrap();
                 unsafe {
                     match key.key().as_ref() {
-                        "z" => self
+                        "w" => self
                             .nes
                             .as_ref()
                             .borrow_mut()
                             .press(Player::One, Button::UP),
-                        "q" => self
+                        "a" => self
                             .nes
                             .as_ref()
                             .borrow_mut()
